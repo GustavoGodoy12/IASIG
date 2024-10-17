@@ -1,13 +1,16 @@
-from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 import os
 from time import sleep
 
+# Carregar as variáveis de ambiente do arquivo .env
 load_dotenv()
 
-cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Configurar a chave da API do OpenAI
+openai.api_key = os.getenv("OPENAI_API_KEY")
 modelo = "gpt-4"
 
+# Definir as diferentes personas
 personas = {
     'positivo': """
         Assuma que você é você é um Entusiasta em tecnologia e dados, um atendente virtual da SIG Campo Largo, 
@@ -39,13 +42,16 @@ personas = {
     """
 }
 
+# Função para selecionar a persona baseada no sentimento do usuário
 def selecionar_persona(mensagem_usuario):
+    # Definir o prompt do sistema para análise de sentimentos
     prompt_sistema = """
     Faça uma análise da mensagem informada abaixo para identificar se o sentimento é: positivo, 
     neutro ou negativo. Retorne apenas um dos três tipos de sentimentos informados como resposta.
     """
 
-    resposta = cliente.chat.completions.create(
+    # Chamar a API do OpenAI para análise do sentimento da mensagem
+    resposta = openai.ChatCompletion.create(
         model=modelo,
         messages=[
             {
@@ -54,10 +60,18 @@ def selecionar_persona(mensagem_usuario):
             },
             {
                 "role": "user",
-                "content" : mensagem_usuario
+                "content": mensagem_usuario
             }
         ],
         temperature=1,
     )
 
-    return resposta.choices[0].message.content.lower()
+    # Retornar a resposta com o sentimento identificado
+    return resposta.choices[0].message.content.lower().strip()
+
+# Teste da função
+if __name__ == "__main__":
+    mensagem = "Estou muito insatisfeito com o suporte que estou recebendo."
+    sentimento = selecionar_persona(mensagem)
+    print(f"Sentimento identificado: {sentimento}")
+    print(f"Persona selecionada: {personas.get(sentimento, 'Nenhuma persona correspondente encontrada.')}")
