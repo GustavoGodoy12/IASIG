@@ -5,6 +5,8 @@ import os
 from time import sleep
 from database import criar_conexao
 from assistente_ecomart import criar_assistente
+from flask import session
+from uuid import uuid4
 
 # Carregar a chave da API do OpenAI
 load_dotenv()
@@ -16,6 +18,9 @@ app.secret_key = 'alura'
 
 # Obter as instruções para o assistente
 assistente_instrucoes = criar_assistente()
+
+historico_conversas = {}
+
 
 # Função principal para gerar queries SQL a partir de um prompt
 def bot(prompt):
